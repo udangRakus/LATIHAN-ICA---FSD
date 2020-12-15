@@ -1,0 +1,119 @@
+---
+title: "19523134-TUTORIAL ICA"
+author: '19523134'
+date: "12/15/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# LATIHAN :
+
+# SOAL 1 :
+
+IMPORT PACKAGE -> EBImage
+```{r}
+library("EBImage")
+```
+
+
+```{r}
+img1 <- readImage("chewy-n-kYzN217sA-unsplash.jpg")
+img2 <- readImage("cassidy-kelley-Sn9Xfygnl74-unsplash.jpg")
+
+display(img1)
+```
+
+```{r}
+display(img2)
+```
+
+
+# SOAL 2 :
+
+Mensimulasikan gambar menggunakan mixing matrix untuk menggabungkan kedua gambar :
+
+```{r}
+A <- matrix(c(0.80,0.20,0.5,0.67),
+        nrow=2, ncol=2, byrow=TRUE)
+
+
+
+x1 <- A[1,1]*img1 + A[1,2]*img2
+x2 <- A[2,1]*img1 + A[2,2]*img2
+```
+
+```{r}
+display(x1)
+```
+
+```{r}
+display(x2)
+```
+
+
+# SOAL 3 :
+
+Gunakan ICA untuk melakukan estimasi kedua gambar :
+
+```{r}
+library(fastICA)
+library(showimage)
+```
+
+
+```{r}
+show_pic <- function(pic) {
+dims <- dim(pic)
+plot(c(0, dims[1]), c(0, dims[2]), type='n', xlab="", ylab="")
+rasterImage(pic,0,0,dims[1],dims[2])
+}
+```
+
+
+```{r}
+dataImg <- cbind(x1,x2)
+set.seed(135)
+ICAModel <- fastICA(dataImg, n.comp = 2, alg.typ = "parallel",
+                    fun= "logcosh", alpha = 1, method = "R", row.norm = FALSE, maxit = 200,
+                    tol = 0.0001)
+
+img1_hat <- ICAModel$S[, 1]
+img2_hat <- ICAModel$S[, 2]
+dim(img1_hat) <- dim(x1)
+dim(img2_hat) <- dim(x2)
+par(mfrow=c(1,2))
+show_pic(normalize(transpose(img1_hat)))
+show_pic(normalize(transpose(img2_hat)))
+```
+
+# SOAL 4 :
+
+Bisa dilihat dari dari hasil estimasi ICA, kedua gambar img1 dan img2 dapat dikembalikkan secara baik terlihat juga pada img 2 (sebelah kanan) walau memiliki warana hitam yang sedikit pudar, mungkin hal yang membuat kedua gambar ini berhasil di kembalikkan secarara baik ada pada nilai perbedaan estimasinya sehingga estimasi yang diakukan berefek pada hasil gambar tersebut.
+
+
+Berikut jika nilai dari set.seed di ubah dengan yang lebih kecil : 
+
+```{r}
+dataImg <- cbind(x1,x2)
+set.seed(80)
+ICAModel <- fastICA(dataImg, n.comp = 2, alg.typ = "parallel",
+                    fun= "logcosh", alpha = 1, method = "R", row.norm = FALSE, maxit = 200,
+                    tol = 0.0001)
+
+img1_hat <- ICAModel$S[, 1]
+img2_hat <- ICAModel$S[, 2]
+dim(img1_hat) <- dim(x1)
+dim(img2_hat) <- dim(x2)
+par(mfrow=c(1,2))
+show_pic(normalize(transpose(img1_hat)))
+show_pic(normalize(transpose(img2_hat)))
+```
+
+Terlihat jadinya img1(sebelah kanan) tidak dapat di kembalikkan secara baik terdapat perubahan warna diseluruh gambarnya, hal ini membuktikan nilai set.seed mempengaruhi nilai dari estimasi itu sendiri.
+
+
+
+
+
+
